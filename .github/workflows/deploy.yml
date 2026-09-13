@@ -27,9 +27,9 @@ jobs:
 
       - name: Sync to S3
         run: |
-          aws s3 sync ./build s3://your-bucket-name \
+          aws s3 sync ./out s3://melinavalyslava-demo-app \
             --delete \
             --cache-control max-age=31536000,public
           # index.html без долгого кэша, чтобы SPA обновлялся сразу
-          aws s3 cp ./build/index.html s3://your-bucket-name/index.html \
+          aws s3 cp ./out/index.html s3://melinavalyslava-demo-app/index.html \
             --cache-control no-cache,no-store,must-revalidate
