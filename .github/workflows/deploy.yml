@@ -1,0 +1,35 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync ./build s3://your-bucket-name \
+            --delete \
+            --cache-control max-age=31536000,public
+          # index.html без долгого кэша, чтобы SPA обновлялся сразу
+          aws s3 cp ./build/index.html s3://your-bucket-name/index.html \
+            --cache-control no-cache,no-store,must-revalidate
